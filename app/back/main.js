@@ -66,13 +66,14 @@ const subscribeToFollowerEvents = async () => {
 function createWindow() {
     const mainWindow = new BrowserWindow({
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'), nodeIntegration: true, // Assurez-vous que nodeIntegration est activé
+            enableRemoteModule: true,
         }
     })
 
     ipcMain.on('auth', (event) => {
 
-        const redirectUri = 'http://localhost';
+        const redirectUri = 'https://gradual.netlify.app/';
         const scopes = ['bits:read', 'moderator:read:followers', 'channel:read:subscriptions', 'user:read:subscriptions	'];
 
         const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes.join(' ')}`;
@@ -92,7 +93,7 @@ function createWindow() {
                     client_secret: clientSecret,
                     code,
                     grant_type: 'authorization_code',
-                    redirect_uri: 'http://localhost',
+                    redirect_uri: 'https://gradual.netlify.app/',
                 },
             })
                 .then(response => {
@@ -124,7 +125,11 @@ app.whenReady().then(() => {
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
-})
+}).then(() => {
+    // Spécifiez le port explicitement
+    const port = 3000;
+    mainWindow.loadURL(`http://localhost:${port}`);
+});
 
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
@@ -377,6 +382,6 @@ async function lights() {
     }).catch(err => {
         return console.log("Error:", err.message);
     });*/
-    setTimeout(() => controller.setColor(0, 255, 0), 5000);
+    setTimeout(() => controller.setColor(5, 54, 30), 5000);
 }
 
