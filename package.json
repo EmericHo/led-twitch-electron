@@ -10,7 +10,7 @@
   },
   "build": {
     "appId": "com.votreentreprise.votreapp",
-    "productName": "NomDeVotreApp",
+    "productName": "Gradual",
     "directories": {
       "output": "dist"
     },

@@ -6,7 +6,8 @@ const { Control, Discovery, CustomMode } = require('magic-home');
 
 const clientId = 'r99ibgskd6tsvakpit7hag9o6o1jty';
 const clientSecret = '0364ju464muwj0850msf2rp7uq4w2d';
-let accessToken = ''
+let accessToken = '';
+let code = '';
 const verifyToken = 'generated_by_twitch';
 
 
@@ -72,10 +73,8 @@ function createWindow() {
     })
 
     ipcMain.on('auth', (event) => {
-
         const redirectUri = 'https://gradual.netlify.app/';
-        const scopes = ['bits:read', 'moderator:read:followers', 'channel:read:subscriptions', 'user:read:subscriptions	'];
-
+        const scopes = ['bits:read', 'moderator:read:followers', 'channel:read:subscriptions', 'user:read:subscriptions', 'channel:read:redemptions', 'channel:manage:redemptions'];
         const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes.join(' ')}`;
         console.log("authentication url:", authUrl)
         mainWindow.loadURL(authUrl);
@@ -84,7 +83,7 @@ function createWindow() {
     mainWindow.webContents.on('did-navigate', (event, url) => {
         console.log('Current URL:', url);
         if (url.includes('?code=')) {
-            const code = new URL(url).searchParams.get('code');
+            code = new URL(url).searchParams.get('code');
             console.log("authentication code:", code)
 
             axios.post('https://id.twitch.tv/oauth2/token', null, {
@@ -104,11 +103,6 @@ function createWindow() {
                 .catch(error => {
                     console.error('Error exchanging code for access token:', error);
                 });
-            // Close the Electron window after handling the OAuth code
-            const mainWindow = BrowserWindow.getFocusedWindow();
-            if (mainWindow) {
-                mainWindow.close();
-            }
         }
     });
 
@@ -134,6 +128,26 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
 })
+
+app.on('will-resume', () => {
+    axios.post('https://id.twitch.tv/oauth2/token', null, {
+        params: {
+            client_id: clientId,
+            client_secret: clientSecret,
+            code,
+            grant_type: 'authorization_code',
+            redirect_uri: 'https://gradual.netlify.app/',
+        },
+    })
+        .then(response => {
+            accessToken = response.data.access_token;
+            console.log(accessToken)
+            subscribeToFollowerEvents();
+        })
+        .catch(error => {
+            console.error('Error exchanging code for access token:', error);
+        });
+});
 
 function createEventSubSubscriptionForFollowers(streamerId, session_id) {
     const apiUrl = 'https://api.twitch.tv/helix/eventsub/subscriptions';
@@ -305,7 +319,7 @@ function createEventSubSubscriptionForRaid(streamerId, session_id) {
         type: 'channel.raid',
         version: '1',
         condition: {
-            broadcaster_user_id: streamerId,
+            to_broadcaster_user_id: streamerId,
         },
         transport: {
             method: 'websocket',
@@ -332,6 +346,7 @@ function handleWebSocketMessage(socket, message, streamerId) {
             createEventSubSubscriptionForReSub(streamerId, message.payload.session.id);
             createEventSubSubscriptionForCheers(streamerId, message.payload.session.id);
             createEventSubSubscriptionForRaid(streamerId, message.payload.session.id);
+            createEventSubSubscriptionForChannelPoints(streamerId, message.payload.session.id);
             break;
 
         case 'session_keepalive':
@@ -343,13 +358,60 @@ function handleWebSocketMessage(socket, message, streamerId) {
             console.log(`Message type: ${message.metadata.message_type}, Notification type: ${message.payload.subscription.type}`)
             if (message.payload.subscription.type === 'channel.follow') {
                 console.log(`${message.payload.event.user_name} a follow !`)
+                lights();
             }
-            lights();
+            else if (message.payload.subscription.type === 'channel.channel_points_custom_reward_redemption.add') {
+                if (message.payload.event.reward.title === 'red') {
+                    setlightsTo(255, 0, 0)
+                }
+                if (message.payload.event.reward.title === 'green') {
+                    setlightsTo(0, 255, 0)
+
+                }
+                if (message.payload.event.reward.title === 'blue') {
+                    setlightsTo(0, 0, 255)
+                }
+            } else {
+                lights();
+            }
             break;
 
         default:
             console.log('Unhandled message type: ', message);
     }
+}
+
+
+function createEventSubSubscriptionForChannelPoints(streamerId, session_id) {
+    const apiUrl = 'https://api.twitch.tv/helix/eventsub/subscriptions';
+    console.log('Sub to follow events:', streamerId);
+
+    const headers = {
+        'Authorization': `Bearer ${accessToken}`,
+        'Client-Id': clientId,
+        'Content-Type': 'application/json',
+    };
+
+    const data = {
+        type: 'channel.channel_points_custom_reward_redemption.add',
+        version: '1',
+        condition: {
+            broadcaster_user_id: streamerId,
+            moderator_user_id: streamerId,
+        },
+        transport: {
+            method: 'websocket',
+            session_id: session_id
+        }
+    };
+
+    axios.post(apiUrl, data, { headers })
+        .then(response => {
+            console.log('Subscription created successfully:', response.data);
+        })
+        .catch(error => {
+            console.error('Error creating subscription:', error.response.data);
+        });
 }
 
 async function lights() {
@@ -385,3 +447,8 @@ async function lights() {
     setTimeout(() => controller.setColor(5, 54, 30), 5000);
 }
 
+async function setlightsTo(red, green, blue) {
+    const controller = new Control("192.168.1.16", { ack: Control.ackMask(0) });
+    controller.setColor(red, green, blue);
+    setTimeout(() => controller.setColor(5, 54, 30), 5000);
+}

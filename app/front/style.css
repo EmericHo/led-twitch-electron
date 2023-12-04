@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #000000, #1c1c1c);
+}
+
+.login-container {
+    text-align: center;
+}
+
+.twitch-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #6441a5;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.twitch-login:hover {
+    background-color: #9147ff;
+}
+
+.twitch-login i {
+    font-size: 40px; /* Ajustez la taille de l'icône selon vos besoins */
+    margin-bottom: 10px;
+    color: #fff; /* Couleur de l'icône */
+}
+
+.twitch-login span {
+    color: #fff;
+}
