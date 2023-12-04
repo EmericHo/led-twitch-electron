@@ -15,10 +15,12 @@
       "output": "dist"
     },
     "mac": {
-      "target": ["dmg"]
+      "target": ["dmg"],
+      "icon": "assets/icon.png"
     },
     "win": {
-      "target": ["nsis"]
+      "target": ["nsis"],
+      "icon": "assets/icon.png"
     }
   },
   "keywords": [],

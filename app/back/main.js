@@ -69,7 +69,8 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'), nodeIntegration: true, // Assurez-vous que nodeIntegration est activé
             enableRemoteModule: true,
-        }
+        },
+        icon: path.join(__dirname, 'assets/icon.png'),
     })
 
     ipcMain.on('auth', (event) => {
