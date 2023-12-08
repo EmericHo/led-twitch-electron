@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('node:path');
 const axios = require('axios');
 const WebSocket = require('ws');
@@ -36,7 +36,7 @@ const getChannelInfo = async (targetChannelName) => {
 
 const subscribeToFollowerEvents = async () => {
     try {
-        await getChannelInfo('Emeroc').then(async channelInfo => {
+        await getChannelInfo('Mavisku').then(async channelInfo => {
 
             const socket = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
 
@@ -72,6 +72,17 @@ function createWindow() {
         },
         icon: path.join(__dirname, 'assets/icon.png'),
     })
+
+    mainWindow.on('closed', () => {
+       /* session.defaultSession.clearCache(() => {
+          
+        });
+        session.defaultSession.clearStorageData({
+            storages: ['appcache', 'cookies', 'passwords'],
+          }, () => {
+            // Storage data cleared
+          });*/
+      });
 
     ipcMain.on('auth', (event) => {
         const redirectUri = 'https://gradual.netlify.app/';
@@ -367,7 +378,6 @@ function handleWebSocketMessage(socket, message, streamerId) {
                 }
                 if (message.payload.event.reward.title === 'green') {
                     setlightsTo(0, 255, 0)
-
                 }
                 if (message.payload.event.reward.title === 'blue') {
                     setlightsTo(0, 0, 255)
@@ -445,11 +455,11 @@ async function lights() {
     }).catch(err => {
         return console.log("Error:", err.message);
     });*/
-    setTimeout(() => controller.setColor(5, 54, 30), 5000);
+    setTimeout(() => controller.setColor(5, 54, 30), 30000);
 }
 
 async function setlightsTo(red, green, blue) {
     const controller = new Control("192.168.1.16", { ack: Control.ackMask(0) });
     controller.setColor(red, green, blue);
-    setTimeout(() => controller.setColor(5, 54, 30), 5000);
+    setTimeout(() => controller.setColor(5, 54, 30), 300000);
 }
