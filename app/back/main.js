@@ -385,13 +385,13 @@ function handleWebSocketMessage(socket, message, streamerId) {
                     lights("jump", 30000);
                 }
                 if (message.payload.event.reward.title === 'Twerk') {
-                    lights("jump", 12000);
+                    lights("jump", 14000);
                 }
                 if (message.payload.event.reward.title === 'Llevanpolka') {
-                    lights("jump", 8000);
+                    lights("jump", 10000);
                 }
-                if (message.payload.event.reward.title === 'Llevanpolka') {
-                    lights("jump", 15000);
+                if (message.payload.event.reward.title === 'Pikadanse') {
+                    lights("jump", 17000);
                 }
             } else {
                 lights("fade", 30000);
@@ -441,20 +441,6 @@ async function lights(transitionType, timeOut) {
     let my_effect = new CustomMode();
 
     my_effect
-        .addColor(255, 0, 0)
-        .addColor(255, 165, 0)
-        .addColor(255, 255, 0)
-        .addColor(0, 255, 0)
-        .addColor(0, 0, 255)
-        .addColor(75, 0, 130)
-        .addColor(143, 0, 255)
-        .addColor(255, 0, 0)
-        .addColor(255, 165, 0)
-        .addColor(255, 255, 0)
-        .addColor(0, 255, 0)
-        .addColor(0, 0, 255)
-        .addColor(75, 0, 130)
-        .addColor(143, 0, 255)
         .addColor(255, 0, 0)
         .addColor(255, 165, 0)
         .addColor(255, 255, 0)
