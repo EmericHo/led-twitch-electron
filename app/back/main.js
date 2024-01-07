@@ -8,7 +8,6 @@ const clientId = 'r99ibgskd6tsvakpit7hag9o6o1jty';
 const clientSecret = '0364ju464muwj0850msf2rp7uq4w2d';
 let accessToken = '';
 let code = '';
-const verifyToken = 'generated_by_twitch';
 
 
 const getChannelInfo = async (targetChannelName) => {
@@ -74,15 +73,15 @@ function createWindow() {
     })
 
     mainWindow.on('closed', () => {
-       /* session.defaultSession.clearCache(() => {
-          
-        });
-        session.defaultSession.clearStorageData({
-            storages: ['appcache', 'cookies', 'passwords'],
-          }, () => {
-            // Storage data cleared
-          });*/
-      });
+        /* session.defaultSession.clearCache(() => {
+           
+         });
+         session.defaultSession.clearStorageData({
+             storages: ['appcache', 'cookies', 'passwords'],
+           }, () => {
+             // Storage data cleared
+           });*/
+    });
 
     ipcMain.on('auth', (event) => {
         const redirectUri = 'https://gradual.netlify.app/';
@@ -370,20 +369,32 @@ function handleWebSocketMessage(socket, message, streamerId) {
             console.log(`Message type: ${message.metadata.message_type}, Notification type: ${message.payload.subscription.type}`)
             if (message.payload.subscription.type === 'channel.follow') {
                 console.log(`${message.payload.event.user_name} a follow !`)
-                lights();
+                lights("fade", 30000);
             }
             else if (message.payload.subscription.type === 'channel.channel_points_custom_reward_redemption.add') {
-                if (message.payload.event.reward.title === 'red') {
+                if (message.payload.event.reward.title === 'Rouge') {
                     setlightsTo(255, 0, 0)
                 }
-                if (message.payload.event.reward.title === 'green') {
-                    setlightsTo(0, 255, 0)
+                if (message.payload.event.reward.title === 'Rose') {
+                    setlightsTo(253, 0, 255)
                 }
-                if (message.payload.event.reward.title === 'blue') {
+                if (message.payload.event.reward.title === 'Bleu') {
                     setlightsTo(0, 0, 255)
                 }
+                if (message.payload.event.reward.title === 'Arc-en-ciel') {
+                    lights("jump", 30000);
+                }
+                if (message.payload.event.reward.title === 'Twerk') {
+                    lights("jump", 12000);
+                }
+                if (message.payload.event.reward.title === 'Llevanpolka') {
+                    lights("jump", 8000);
+                }
+                if (message.payload.event.reward.title === 'Llevanpolka') {
+                    lights("jump", 15000);
+                }
             } else {
-                lights();
+                lights("fade", 30000);
             }
             break;
 
@@ -425,24 +436,40 @@ function createEventSubSubscriptionForChannelPoints(streamerId, session_id) {
         });
 }
 
-async function lights() {
-    const controller = new Control("192.168.1.16", { ack: Control.ackMask(0) });
+async function lights(transitionType, timeOut) {
+    const controller = new Control("192.168.1.15", { ack: Control.ackMask(0) });
     let my_effect = new CustomMode();
 
     my_effect
-        .addColor(255, 0, 255)
-        .addColor(0, 255, 0)
         .addColor(255, 0, 0)
-        .addColor(0, 0, 255)
-        .addColor(255, 0, 255)
+        .addColor(255, 165, 0)
+        .addColor(255, 255, 0)
         .addColor(0, 255, 0)
-        .addColor(255, 0, 0)
         .addColor(0, 0, 255)
-        .addColor(255, 0, 255)
+        .addColor(75, 0, 130)
+        .addColor(143, 0, 255)
+        .addColor(255, 0, 0)
+        .addColor(255, 165, 0)
+        .addColor(255, 255, 0)
         .addColor(0, 255, 0)
-        .addColor(255, 0, 0)
         .addColor(0, 0, 255)
-        .setTransitionType("fade");
+        .addColor(75, 0, 130)
+        .addColor(143, 0, 255)
+        .addColor(255, 0, 0)
+        .addColor(255, 165, 0)
+        .addColor(255, 255, 0)
+        .addColor(0, 255, 0)
+        .addColor(0, 0, 255)
+        .addColor(75, 0, 130)
+        .addColor(143, 0, 255)
+        .addColor(255, 0, 0)
+        .addColor(255, 165, 0)
+        .addColor(255, 255, 0)
+        .addColor(0, 255, 0)
+        .addColor(0, 0, 255)
+        .addColor(75, 0, 130)
+        .addColor(143, 0, 255)
+        .setTransitionType(transitionType);
 
     controller.setCustomPattern(my_effect, 100).then(success => {
         console.log((success) ? "success" : "failed");
@@ -455,11 +482,11 @@ async function lights() {
     }).catch(err => {
         return console.log("Error:", err.message);
     });*/
-    setTimeout(() => controller.setColor(5, 54, 30), 30000);
+    setTimeout(() => controller.setColor(5, 54, 30), timeOut);
 }
 
 async function setlightsTo(red, green, blue) {
-    const controller = new Control("192.168.1.16", { ack: Control.ackMask(0) });
+    const controller = new Control("192.168.1.15", { ack: Control.ackMask(0) });
     controller.setColor(red, green, blue);
     setTimeout(() => controller.setColor(5, 54, 30), 300000);
 }
