@@ -436,6 +436,19 @@ function handleWebSocketMessage(socket, message, streamerId) {
         if (message.payload.event.reward.title === "Pikadanse") {
           lights("jump", 17000);
         }
+        console.log(message.payload.event.reward.title);
+        if (message.payload.event.reward.title === "100 pts cagnotte") {
+          lights("jump", 5000);
+        }
+        if (message.payload.event.reward.title === "1000 pts cagnotte") {
+          lights("jump", 5000);
+        }
+        if (message.payload.event.reward.title === "10000 pts cagnotte") {
+          lights("jump", 15000);
+        }
+        if (message.payload.event.reward.title === "100000 pts cagnotte") {
+          lights("jump", 15000);
+        }
       } else {
         lights("fade", 30000);
       }
